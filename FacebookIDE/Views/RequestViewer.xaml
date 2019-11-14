@@ -1,0 +1,302 @@
+﻿<UserControl x:Class="FacebookIDE.Views.RequestViewer"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:a="http://icsharpcode.net/sharpdevelop/avalonedit"
+      xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+      xmlns:sys="clr-namespace:System;assembly=mscorlib"
+      xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+      xmlns:local="clr-namespace:FacebookIDE"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      >
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="visibilityConverter"/>
+    </UserControl.Resources>
+
+    <Grid Background="White" DataContext="{Binding ViewModel,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="80"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Border BorderThickness="0,0,0,1" Padding="20,0" BorderBrush="{StaticResource BorderBrush}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="70"/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Border BorderThickness="1,1,0,1" BorderBrush="{StaticResource BorderBrush}" CornerRadius="5,0,0,5" VerticalAlignment="Center" Height="40">
+                    <Border.Background>
+                        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                            <GradientStop Color="#FFEBEBEB" Offset="0"/>
+                            <GradientStop Color="Gainsboro" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <TextBlock Text="{Binding HttpRequest.Method}" VerticalAlignment="Center" HorizontalAlignment="Center" FontWeight="Bold" Margin="10,0"/>
+                </Border>
+
+
+
+                <TextBox 
+                    Grid.Column="1" 
+                    Height="40" 
+                    VerticalContentAlignment="Center" 
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    Background="#FFEEEEEE" 
+                    Text="{Binding HttpRequest.RequestUri, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" 
+                    FontSize="16" 
+                    Padding="3" 
+                    Foreground="#FF767676"/>
+                <Button Content="Send Request" Grid.Column="2" Height="40" Style="{DynamicResource RequestButtonStyle}" Width="120" Click="Send_RequestClick"/>
+            </Grid>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" CanContentScroll="False" >
+            <StackPanel>
+                <Border Background="#FFF9F9F9">
+                    <Grid>
+                        <TabControl Grid.Row="1" MinHeight="100" BorderThickness="0,1,0,0" Margin="0,5,0,0" BorderBrush="{StaticResource BorderBrush}">
+                            <TabItem Header="Params" Style="{DynamicResource TabItemParamsStyle}" >
+                                <StackPanel>
+                                    <ListView x:Name="paramList" BorderThickness="0" ItemsSource="{Binding HttpRequest.QueryParameters}">
+                                        <ListView.View>
+                                            <GridView>
+                                                <GridViewColumn Header="" Width="30">
+                                                    <GridViewColumn.CellTemplate>
+                                                        <DataTemplate>
+                                                            <CheckBox IsChecked="{Binding IsEnabled, Mode=TwoWay}"/>
+                                                        </DataTemplate>
+                                                    </GridViewColumn.CellTemplate>
+                                                </GridViewColumn>
+                                                <GridViewColumn Header="Key" Width="300">
+                                                    <GridViewColumn.CellTemplate>
+                                                        <DataTemplate>
+                                                            <ComboBox IsEditable="True" Text="{Binding Name, UpdateSourceTrigger=LostFocus}" Height="25" BorderBrush="{StaticResource BorderBrush}" ItemsSource="{Binding QueryFields, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=UserControl}}"/>
+                                                        </DataTemplate>
+                                                    </GridViewColumn.CellTemplate>
+                                                </GridViewColumn>
+                                                <GridViewColumn Header="Value" Width="300">
+                                                    <GridViewColumn.CellTemplate>
+                                                        <DataTemplate>
+                                                            <TextBox Height="25" Text="{Binding Value, UpdateSourceTrigger=LostFocus}"  BorderBrush="{StaticResource BorderBrush}"/>
+                                                        </DataTemplate>
+                                                    </GridViewColumn.CellTemplate>
+                                                </GridViewColumn>
+                                            </GridView>
+                                        </ListView.View>
+                                    </ListView>
+                                    <Button Content="✚" HorizontalAlignment="Left" Height="16" Margin="9,3" Style="{DynamicResource AddButtonStyle}" Width="16" Click="Add_Param_Click"/>
+                                </StackPanel>
+                            </TabItem>
+                            <TabItem Header="Authorization" Style="{DynamicResource TabItemParamsStyle}" >
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="1*"/>
+                                        <ColumnDefinition Width="2*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Margin="5">
+                                        <TextBlock Text="AppId" Margin="5"/>
+                                        <TextBox x:Name="appId" Margin="5,0" LostFocus="appId_LostFocus"/>
+                                        <TextBlock Text="Redirect Uri" Margin="5"/>
+                                        <TextBox x:Name="redirectUri" Text="https://www.facebook.com/connect/login_success.html" Margin="5,0"/>
+                                        <Button Margin="5,15" Click="Request_AccessToken">Request new Access Token</Button>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Margin="5" VerticalAlignment="Center">
+                                        <TextBlock Margin="5" Text="Access Token"/>
+                                        <TextBox x:Name="txt_token" Margin="5,0" Text="{Binding HttpRequest.QueryParameters[access_token].Value,Mode=TwoWay,ValidatesOnExceptions=True}" LostFocus="Token_LostFocus"/>
+
+                                        <Border Background="#FFD5DADC" CornerRadius="10" Margin="5,10">
+                                            <Grid Margin="5">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+                                                <Image Source="/FacebookIDE;component/Assets/Images/info.png" Width="36" Height="36" Margin="10"/>
+                                                <RichTextBox Grid.Column="1" Margin="5" Background="Transparent" BorderThickness="0" IsReadOnly="True" IsDocumentEnabled="True">
+                                                    <FlowDocument Background="Transparent">
+                                                        <Paragraph>
+                                                            <Run IsEnabled="False">To use this functionality, you must obtain an App Id from the</Run>
+                                                            <Hyperlink NavigateUri="https://developers.facebook.com/apps/" RequestNavigate="Hyperlink_RequestNavigate">facebook developer panel.</Hyperlink>
+                                                            <Run>You must enable the "OAuth Client Login" option and set the redirect uri to</Run>
+                                                            <Bold>https://www.facebook.com/connect/login_success.html</Bold>
+                                                        </Paragraph>
+                                                    </FlowDocument>
+                                                </RichTextBox>
+                                            </Grid>
+                                        </Border>
+                                    </StackPanel>
+                                </Grid>
+                            </TabItem>
+                            <TabItem Header="Headers" Style="{DynamicResource TabItemParamsStyle}">
+                                <StackPanel>
+                                    <ListView BorderThickness="0" ItemsSource="{Binding HttpRequest.HeaderFields}">
+                                        <ListView.View>
+                                            <GridView>
+                                                <GridViewColumn Header="" Width="30">
+                                                    <GridViewColumn.CellTemplate>
+                                                        <DataTemplate>
+                                                            <CheckBox IsChecked="{Binding IsEnabled, Mode=TwoWay}"/>
+                                                        </DataTemplate>
+                                                    </GridViewColumn.CellTemplate>
+                                                </GridViewColumn>
+                                                <GridViewColumn Header="Key" Width="300">
+                                                    <GridViewColumn.CellTemplate>
+                                                        <DataTemplate>
+                                                            <ComboBox IsEditable="True" Text="{Binding Name, UpdateSourceTrigger=LostFocus}" Height="25" BorderBrush="{StaticResource BorderBrush}" ItemsSource="{Binding HeaderFields, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=UserControl}}"/>
+                                                        </DataTemplate>
+                                                    </GridViewColumn.CellTemplate>
+                                                </GridViewColumn>
+                                                <GridViewColumn Header="Value" Width="300">
+                                                    <GridViewColumn.CellTemplate>
+                                                        <DataTemplate>
+                                                            <TextBox Height="25" Text="{Binding Value, UpdateSourceTrigger=LostFocus}"  BorderBrush="{StaticResource BorderBrush}"/>
+                                                        </DataTemplate>
+                                                    </GridViewColumn.CellTemplate>
+                                                </GridViewColumn>
+                                            </GridView>
+                                        </ListView.View>
+                                    </ListView>
+                                    <Button Content="✚" HorizontalAlignment="Left" Height="16" Margin="9,3" Style="{DynamicResource AddButtonStyle}" Width="16" Click="Add_Header_Click"/>
+                                </StackPanel>
+                            </TabItem>
+                            <TabItem Header="Body" Style="{DynamicResource TabItemParamsStyle}">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <RadioButton IsChecked="{Binding IsEmptyContent, Mode=TwoWay}" GroupName="b" Margin="10,5">none</RadioButton>
+                                        <RadioButton IsChecked="{Binding IsFormUrlContent,Mode=TwoWay}" GroupName="b" x:Name="form_rb" Margin="10,5">x-www-form-urlencoded</RadioButton>
+                                        <RadioButton IsChecked="{Binding IsRawContent, Mode=TwoWay}" GroupName="b" x:Name="raw_rb" Margin="10,5">raw</RadioButton>
+                                        <ComboBox IsEditable="True" IsEnabled="{Binding IsChecked, ElementName=raw_rb}" Width="120" SelectedIndex="0" SelectedItem="{Binding HttpRequest.ContentType,Mode=TwoWay}">
+                                            <sys:String>text/plain</sys:String>
+                                            <sys:String>application/json</sys:String>
+                                            <sys:String>application/javascript</sys:String>
+                                            <sys:String>application/xml</sys:String>
+                                            <sys:String>text/xml</sys:String>
+                                            <sys:String>text/html</sys:String>
+                                        </ComboBox>
+                                    </StackPanel>
+
+                                    <StackPanel Visibility="{Binding IsChecked, ElementName=form_rb, Converter={StaticResource visibilityConverter}}">
+                                        <ListView BorderThickness="0" ItemsSource="{Binding HttpRequest.BodyFields}">
+                                            <ListView.View>
+                                                <GridView>
+                                                    <GridViewColumn Header="" Width="30">
+                                                        <GridViewColumn.CellTemplate>
+                                                            <DataTemplate>
+                                                                <CheckBox IsChecked="{Binding IsEnabled, Mode=TwoWay}"/>
+                                                            </DataTemplate>
+                                                        </GridViewColumn.CellTemplate>
+                                                    </GridViewColumn>
+                                                    <GridViewColumn Header="Key" Width="300">
+                                                        <GridViewColumn.CellTemplate>
+                                                            <DataTemplate>
+                                                                <ComboBox IsEditable="True" Text="{Binding Name, UpdateSourceTrigger=LostFocus}" Height="25" BorderBrush="{StaticResource BorderBrush}" ItemsSource="{Binding BodyFields, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=UserControl}}"/>
+                                                            </DataTemplate>
+                                                        </GridViewColumn.CellTemplate>
+                                                    </GridViewColumn>
+                                                    <GridViewColumn Header="Value" Width="300">
+                                                        <GridViewColumn.CellTemplate>
+                                                            <DataTemplate>
+                                                                <TextBox Height="25" Text="{Binding Value, UpdateSourceTrigger=LostFocus}"  BorderBrush="{StaticResource BorderBrush}"/>
+                                                            </DataTemplate>
+                                                        </GridViewColumn.CellTemplate>
+                                                    </GridViewColumn>
+                                                </GridView>
+                                            </ListView.View>
+                                        </ListView>
+                                        <Button Content="✚" HorizontalAlignment="Left" Height="16" Margin="9,3" Style="{DynamicResource AddButtonStyle}" Width="16" Click="Add_Body_Click" />
+                                    </StackPanel>
+
+                                    <a:TextEditor Height="100" Visibility="{Binding IsChecked, ElementName=raw_rb, Converter={StaticResource visibilityConverter}}" ShowLineNumbers="True" >
+                                        <i:Interaction.Behaviors>
+                                            <local:AvalonEditBehaviour GiveMeTheText="{Binding HttpRequest.BodyContent,Mode=TwoWay}"/>
+                                        </i:Interaction.Behaviors>
+                                    </a:TextEditor>
+                                </StackPanel>
+                            </TabItem>
+                        </TabControl>
+
+                        <Button Style="{StaticResource TabButtonStyle}" 
+                                Foreground="Gray" FontSize="20" FontWeight="SemiBold"
+                                Width="25" Height="25" HorizontalAlignment="Right" 
+                                VerticalAlignment="Top" Margin="10" Click="Help_Click">?</Button>
+                    </Grid>
+                </Border>
+                <Border Background="#FFF9F9F9" BorderThickness="0,1" BorderBrush="{StaticResource BorderBrush}" Margin="0,5">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Margin="8" Foreground="#FF7A7A7A">
+                            <Run FontWeight="SemiBold" FontSize="18">Response:</Run>
+                            <Run FontSize="16" Text="{Binding ResponseMessage.StatusCode}"/> -
+                            <Run FontSize="14" Text="{Binding ResponseMessage.Content.Headers.ContentType.MediaType}"/>
+                        </TextBlock>
+                        <TabControl Grid.Row="1" BorderThickness="0,1,0,0" MinHeight="600">
+                            <TabItem Header="Body" Style="{StaticResource TabItemParamsStyle}">
+                                <a:TextEditor x:Name="avalon_txt" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Hidden" ShowLineNumbers="True" SyntaxHighlighting="JavaScript"/>
+                            </TabItem>
+                            <TabItem Header="Headers" Style="{StaticResource TabItemParamsStyle}">
+                                <ItemsControl x:Name="responseHeader" ItemsSource="{Binding HeaderResponse}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock>
+                                                <Run Text="{Binding Name}" FontWeight="Bold"/>:
+                                                <Run Text="{Binding Value}"/>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </TabItem>
+                            <TabItem Header="Charts" Style="{StaticResource TabItemParamsStyle}">
+                                <StackPanel>
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Data Collection Path:" Margin="5,2"/>
+                                        <TextBox Grid.Row="1" Text="{Binding HttpRequest.Chart.DataPath,Mode=TwoWay}" Margin="5,2"/>
+
+                                        <TextBlock Grid.Column="1" Text="Serie Field:" Margin="5,2"/>
+                                        <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding HttpRequest.Chart.SerieField,Mode=TwoWay}" Margin="5,2"/>
+
+                                        <TextBlock Grid.Column="2" Text="Label Field:" Margin="5,2"/>
+                                        <TextBox Grid.Column="2" Grid.Row="2" Text="{Binding HttpRequest.Chart.LabelField,Mode=TwoWay}" Margin="5,2"/>
+
+                                        <Button Grid.Column="3" Grid.RowSpan="2" Margin="5,2" Click="Button_Click">Generate Chart</Button>
+                                    </Grid>
+                                    
+
+                                    <lvc:CartesianChart x:Name="chart" Series="{Binding ChartColumnData}" LegendLocation="Bottom" Height=" 400" VerticalAlignment="Top" Margin="0,40">
+                                        <lvc:CartesianChart.AxisX>
+                                            <lvc:Axis Title="Series" Labels="{Binding ChartLabels}"></lvc:Axis>
+                                        </lvc:CartesianChart.AxisX>
+                                        <lvc:CartesianChart.AxisY>
+                                            <lvc:Axis Title="Values" LabelFormatter="{Binding Formatter}"></lvc:Axis>
+                                        </lvc:CartesianChart.AxisY>
+                                    </lvc:CartesianChart>
+
+
+                                    <lvc:PieChart LegendLocation="Bottom" Series="{Binding ChartPieData}" Hoverable="True" HoverPushOut="20" Height="400" Margin="0,40">
+
+                                    </lvc:PieChart>
+                                </StackPanel>
+                            </TabItem>
+                        </TabControl>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

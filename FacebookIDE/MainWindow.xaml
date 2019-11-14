@@ -1,0 +1,140 @@
+﻿<Window x:Class="FacebookIDE.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:b="clr-namespace:Windows.Controls.Behaviors"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:m="clr-namespace:FacebookIDE.Model"
+        xmlns:u="clr-namespace:FacebookIDE.Views"
+        xmlns:local="clr-namespace:FacebookIDE" Icon="fb.ico"
+        mc:Ignorable="d" WindowState="Normal" WindowStartupLocation="CenterScreen"
+        Title="Facebook Ads" Height="768" Width="1280" StateChanged="Window_StateChanged">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome NonClientFrameEdges="None" UseAeroCaptionButtons="True" CaptionHeight="10" GlassFrameThickness="1" ResizeBorderThickness="0" />
+    </WindowChrome.WindowChrome>
+
+    
+    <Grid x:Name="rootGrid" Background="#FF565A60">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!--Top bar menu-->
+        <Border MouseDown="Move_Window" BorderThickness="0,1" BorderBrush="#FF303846">
+            <Grid>
+                <Grid.Background>
+                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                        <GradientStop Color="#FF444950" Offset="1"/>
+                        <GradientStop Color="#FF444F5F"/>
+                    </LinearGradientBrush>
+                </Grid.Background>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Image Source="Assets/Images/fblogo.png" HorizontalAlignment="Left" Margin="10,4,0,4"/>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="4,0">
+                    <Button Style="{DynamicResource ChromeButtonStyle}" Click="Minimize_Click">&#x2014;</Button>
+                    <Button Style="{DynamicResource ChromeButtonStyle}" Click="Maximize_Click">&#x2B1C;</Button>
+                    <Button Style="{DynamicResource ChromeButtonStyle}" Click="Close_Click">&#x274C;</Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition MinWidth="300" Width="2*"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition MinWidth="400" Width="10*"/>
+            </Grid.ColumnDefinitions>
+
+            <!--sidebar-->
+            <Grid Background="#FF35383D">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Border Height="60" Background="#FF545A62" BorderThickness="0,0,0,1" BorderBrush="#FF6D747F">
+                        <Border CornerRadius="20" Margin="15,0" VerticalAlignment="Center" Height="35" Background="#FF464D57" BorderThickness="1,1,1,2" BorderBrush="#FF5E6063">
+                            <Grid>
+                                <TextBox Text="search..." VerticalAlignment="Center" Margin="15,0,40,0" FontSize="14" BorderThickness="0" Background="Transparent" Foreground="#FF979DA6"/>
+                                <TextBlock Text="&#128269;" VerticalAlignment="Center" Margin="10,0" HorizontalAlignment="Right" Foreground="#FF9C9C9C"/>
+                            </Grid>
+                        </Border>
+                    </Border>
+
+                    <ListBox x:Name="items" ItemsSource="{Binding SidebarRequests}" Grid.Row="1" BorderThickness="0" Margin="-1" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDoubleClick="items_MouseDoubleClick">
+                        <ListBox.Resources>
+                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource SidebarListBoxItemStyle}"/>
+                        </ListBox.Resources>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Height="80" ToolTip="{Binding Description}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Line X1="0" X2="1" Stroke="#FF42484E" Stretch="Fill" Height="1" Grid.ColumnSpan="2" VerticalAlignment="Top"/>
+                                    <TextBlock Text="{Binding HttpRequest.Method}" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="UltraBlack" Foreground="#FF2B323C"/>
+                                    <TextBlock Text="{Binding HttpRequest.Method}" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="#FFFFD538"/>
+
+                                    <StackPanel Grid.Column="1" Margin="0,3,8,3" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Name}" Foreground="#FFCACACA" FontWeight="SemiBold" FontSize="15"/>
+                                        <TextBlock TextWrapping="Wrap" MaxHeight="50" TextTrimming="CharacterEllipsis" Text="{Binding HttpRequest.RequestUri}" Foreground="#FFCACACA"/>
+                                    </StackPanel>
+                                    
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+
+
+                    </ListBox>
+                </Grid>
+            </Grid>
+
+
+
+            <GridSplitter Grid.Column="1" VerticalAlignment="Stretch" Width="5" Background="#444950" ResizeDirection="Columns" ResizeBehavior="PreviousAndNext"/>
+
+            <Grid Grid.Column="2">
+                <Grid.Background>
+                    <ImageBrush ImageSource="Assets/facebook-logo.png" Stretch="Uniform"/>
+                </Grid.Background>
+                <TabControl b:TabContent.IsCached="True" ItemsSource="{Binding Requests}" SelectedIndex="{Binding SelectedIndex,Mode=TwoWay}" Background="Transparent" Grid.Row="2" BorderThickness="0,0,0,0" Margin="0,10,0,0" Grid.RowSpan="2" BorderBrush="#7F778293">
+                    <TabControl.ItemContainerStyle>
+                        <Style TargetType="TabItem" BasedOn="{StaticResource BrowserTabStyle}">                           
+                            <Setter Property="Padding" Value="0"/>
+                        </Style>
+                    </TabControl.ItemContainerStyle>
+                    <b:TabContent.Template>
+                        <DataTemplate DataType="{x:Type m:StoredRequest}">
+                            <Grid>
+                                <u:RequestViewer 
+                                    APIRequest="{Binding HttpRequest}" 
+                                    QueryFields="{Binding ValidUriParameters}" 
+                                    HeaderFields="{Binding ValidHeaderParameters}"
+                                    BodyFields="{Binding ValidBodyParameters}"
+                                    HelpUri="{Binding DocumentationUri}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </b:TabContent.Template>
+                    <TabControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Margin="20,8,5,5">
+                                <Ellipse Fill="Green" Width="5" Height="5" VerticalAlignment="Center"/>
+                                <TextBlock Text="http://api.facebook.com" Margin="5,0" TextTrimming="CharacterEllipsis" Foreground="#FF606060" VerticalAlignment="Center"/>
+                                <Button Content="❌" Height="20" Style="{DynamicResource TabButtonStyle}" Width="20" VerticalAlignment="Center" Tag="{Binding}" Click="CloseTab_Click"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </TabControl.ItemTemplate>                    
+                </TabControl>
+            </Grid>
+
+        </Grid>
+    </Grid>
+</Window>

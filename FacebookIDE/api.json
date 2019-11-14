@@ -1,0 +1,44 @@
+[
+  {
+    "Name": "Targeting Search",
+    "Description": "Target Ad sets on a number of criteria you provide in Targeting Specs. Most targets are predefined values, such as country \"Japan\" or city \"Tokyo\".",
+    "DocumentationUri": "https://developers.facebook.com/docs/marketing-api/targeting-search/",
+    "HttpRequest": {
+      "RequestUri": "https://graph.facebook.com/v4.0/search?location_types=[\"region\"]&type=adinterest&q=al",
+      "Method": {
+        "Method": "GET"
+      },
+      "Chart": {
+        "DataPath": "$.data[*]",
+        "SerieField": "$.audience_size",
+        "LabelField": "$.name"
+      },
+
+      "BodyContent": null,
+      "ContentType": "text/plain",
+      "BodyType": "None"
+    },
+    "ValidUriParameters": [
+      "location_types",
+      "interest_list",
+      "targeting_list",
+      "id_list",
+      "name_list",
+      "class",
+      "limit",
+      "limit_type",
+      "locale",
+      "type",
+      "q",
+      "access_token",
+      "cities",
+      "zips",
+      "countries",
+      "regions",
+      "latitude",
+      "longitude"
+    ],
+    "ValidHeaderParameters": [],
+    "ValidBodyParameters": []
+  }
+]
