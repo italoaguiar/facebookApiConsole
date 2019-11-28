@@ -1,5 +1,82 @@
 [
   {
+    "Name": "Get User Id",
+    "Description": "Gets the user Id.",
+    "DocumentationUri": "https://developers.facebook.com/search/?referer=dev_header&q=%2Fme",
+    "HttpRequest": {
+      "RequestUri": "https://graph.facebook.com/v4.0/me?access_token=",
+      "Method": {
+        "Method": "GET"
+      },
+      "Chart": {
+        "DataPath": "",
+        "SerieField": "",
+        "LabelField": ""
+      },
+
+      "BodyContent": null,
+      "ContentType": "text/plain",
+      "BodyType": "None"
+    },
+    "ValidUriParameters": [
+      "access_token"
+    ],
+    "ValidHeaderParameters": [],
+    "ValidBodyParameters": []
+  },
+  {
+    "Name": "Get Ad Account Id",
+    "Description": "Gets the Ad account.",
+    "DocumentationUri": "https://developers.facebook.com/docs/graph-api/reference/user/adaccounts/",
+    "HttpRequest": {
+      "RequestUri": "https://graph.facebook.com/v5.0/<USER_ID>/adaccounts?access_token=",
+      "Method": {
+        "Method": "GET"
+      },
+      "Chart": {
+        "DataPath": "",
+        "SerieField": "",
+        "LabelField": ""
+      },
+
+      "BodyContent": null,
+      "ContentType": "text/plain",
+      "BodyType": "None"
+    },
+    "ValidUriParameters": [
+      "access_token"
+    ],
+    "ValidHeaderParameters": [],
+    "ValidBodyParameters": []
+  },
+  {
+    "Name": "Ad Account Reachestimate",
+    "Description": "To get the Reach Estimates of a targeting specification using this ad account.",
+    "DocumentationUri": "https://developers.facebook.com/docs/marketing-api/reference/ad-account/reachestimate/",
+    "HttpRequest": {
+      "RequestUri": "https://graph.facebook.com/v5.0/act_<AD_ACCOUNT_ID>/reachestimate?targeting_spec=%7B%22geo_locations%22%3A%7B%22countries%22%3A%5B%22US%22%5D%7D%2C%22age_min%22%3A20%2C%22age_max%22%3A40%7D",
+      "Method": {
+        "Method": "GET"
+      },
+      "Chart": {
+        "DataPath": "",
+        "SerieField": "",
+        "LabelField": ""
+      },
+
+      "BodyContent": null,
+      "ContentType": "text/plain",
+      "BodyType": "None"
+    },
+    "ValidUriParameters": [
+      "access_token",
+      "object_store_url",
+      "targeting_spec"
+    ],
+    "ValidHeaderParameters": [],
+    "ValidBodyParameters": []
+  },
+  {
     "Name": "Targeting Search",
     "Description": "Target Ad sets on a number of criteria you provide in Targeting Specs. Most targets are predefined values, such as country \"Japan\" or city \"Tokyo\".",
     "DocumentationUri": "https://developers.facebook.com/docs/marketing-api/targeting-search/",

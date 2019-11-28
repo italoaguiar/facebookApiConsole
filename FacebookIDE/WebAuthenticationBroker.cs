@@ -1,6 +1,9 @@
-﻿using System;
+﻿using CefSharp;
+using CefSharp.Wpf;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,65 +16,103 @@ namespace FacebookIDE
 {
     public class WebAuthenticationBroker
     {
-        public WebAuthenticationBroker(string appId, Uri redirectUri)
+        public WebAuthenticationBroker(string appId, Uri redirectUri, string scope = null)
         {
             this.appId = appId;
             this.redirectUri = redirectUri;
+            this.scope = scope;
 
             NativeMethods.SuppressCookiePersistence();
 
-            browser = new WebBrowser();            
+            browser = new ChromiumWebBrowser();            
             window = new Window();
             window.WindowStyle = WindowStyle.SingleBorderWindow;
-            window.Width = 450;
-            window.Height = 550;
+            window.Width = 600;
+            window.Height = 650;
             window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             window.ResizeMode = ResizeMode.NoResize;
             window.Content = browser;
 
-            browser.Navigating += Browser_Navigating;
+
+            browser.FrameLoadStart += this.Browser_FrameLoadStart;
+            browser.FrameLoadEnd += Browser_FrameLoadEnd;
+            
+            
+
+            //browser.Navigating += Browser_Navigating;
+            //browser.Navigated += Browser_Navigated;
         }
 
-
-        private void Browser_Navigating(object sender, System.Windows.Navigation.NavigatingCancelEventArgs e)
+        private void Browser_FrameLoadEnd(object sender, FrameLoadEndEventArgs e)
         {
-            if (e.Uri.AbsoluteUri.StartsWith(redirectUri.AbsoluteUri))
+            window.Dispatcher.Invoke(() =>
             {
-                try
+                var k = browser.Address;
+                System.Diagnostics.Debug.WriteLine(k);
+
+                if (k.StartsWith(redirectUri.AbsoluteUri))
                 {
-                    string url = e.Uri.Fragment.Replace("#", "?");
-                    var r = HttpUtility.ParseQueryString(url);
-
-
-                    token = new AccessToken()
+                    try
                     {
-                        Token = r["access_token"],
-                        ExpireIn = int.Parse(r["expires_in"]),
-                        State = r["state"]
-                    };
+                        string url = (new Uri(k)).Fragment.Replace("#", "?");
+                        var r = HttpUtility.ParseQueryString(url);
 
-                    window.DialogResult = true;
+
+                        token = new AccessToken()
+                        {
+                            Token = r["access_token"],
+                            ExpireIn = int.Parse(r["expires_in"]),
+                            State = r["state"]
+                        };
+
+                        window.DialogResult = true;
+                    }
+                    catch
+                    {
+                        window.DialogResult = false;
+                    }
                 }
-                catch
-                {
-                    window.DialogResult = false;
-                }
-            }
+            });
+        }
+
+        private void Browser_FrameLoadStart(object sender, FrameLoadStartEventArgs e)
+        {
+            window.Dispatcher.Invoke(() =>
+            {
+                var k = browser.Address;
+                System.Diagnostics.Debug.WriteLine(k);
+            });
         }
 
 
-        WebBrowser browser;
+
+
+
+        ChromiumWebBrowser browser;
         Window window;
         Uri redirectUri;
         string appId;
+        string scope;
         AccessToken token;
 
 
 
         public async Task<AccessToken> AuthenticateAsync()
         {
-            browser.Navigate(new Uri($"https://www.facebook.com/v5.0/dialog/oauth?client_id={appId}&redirect_uri={redirectUri}&response_type=token&state={Guid.NewGuid()}&display=popup"));
+            Cef.GetGlobalCookieManager().DeleteCookies("", "");
+
+            string req_scope = "";
+            if (!string.IsNullOrEmpty(scope))
+            {
+                req_scope = "&scope=" + scope;
+            }
+            var url = new Uri($"https://www.facebook.com/v5.0/dialog/oauth?client_id={appId}&redirect_uri={redirectUri}&response_type=token&state={Guid.NewGuid()}&display=popup{req_scope}");
+            
+            //browser.Navigate(url);
             await Task.Delay(50);
+
+            browser.Address = url.AbsoluteUri;
+
             if(window.ShowDialog() == true)
             {
                 return token;

@@ -164,7 +164,15 @@ namespace FacebookIDE.Views
         {
             try
             {
-                WebAuthenticationBroker w = new WebAuthenticationBroker(appId.Text, new Uri(redirectUri.Text));
+                Permissions pm = new Permissions();
+                pm.ShowDialog();
+
+                if (pm.DialogResult == false)
+                {
+                    throw new Exception("Failed to get Token");
+                }
+
+                WebAuthenticationBroker w = new WebAuthenticationBroker(appId.Text, new Uri(redirectUri.Text), pm.Scopes);
                 var token = await w.AuthenticateAsync();
 
                 var t = ViewModel.HttpRequest.QueryParameters["access_token"];
