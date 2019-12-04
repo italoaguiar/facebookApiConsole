@@ -16,6 +16,9 @@ namespace FacebookIDE.Model
         public string[] ValidBodyParameters { get; set; }
         public Uri DocumentationUri { get; set; }
 
+        public RequestType Type { get; set; }
+        public string Code { get; set; }
+
         public StoredRequest Clone()
         {
             var j = Newtonsoft.Json.JsonConvert.SerializeObject(this);

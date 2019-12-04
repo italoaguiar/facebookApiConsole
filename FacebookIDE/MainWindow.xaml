@@ -14,7 +14,56 @@
     <WindowChrome.WindowChrome>
         <WindowChrome NonClientFrameEdges="None" UseAeroCaptionButtons="True" CaptionHeight="10" GlassFrameThickness="1" ResizeBorderThickness="0" />
     </WindowChrome.WindowChrome>
+    <Window.Resources>
+        <DataTemplate x:Key="singleRequestTemplate">
+            <Grid>
+                <u:RequestViewer 
+                    APIRequest="{Binding HttpRequest}" 
+                    QueryFields="{Binding ValidUriParameters}" 
+                    HeaderFields="{Binding ValidHeaderParameters}"
+                    BodyFields="{Binding ValidBodyParameters}"
+                    HelpUri="{Binding DocumentationUri}"/>
 
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="codeRequestTemplate">
+            <u:ScriptViewer Code="{Binding Code}"/>
+        </DataTemplate>
+        <DataTemplate x:Key="sideSingleRequestTemplate">
+            <Grid Height="80" ToolTip="{Binding Description}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="60"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Line X1="0" X2="1" Stroke="#FF42484E" Stretch="Fill" Height="1" Grid.ColumnSpan="2" VerticalAlignment="Top"/>
+                <TextBlock Text="{Binding HttpRequest.Method}" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="UltraBlack" Foreground="#FF2B323C"/>
+                <TextBlock Text="{Binding HttpRequest.Method}" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="#FFFFD538"/>
+
+                <StackPanel Grid.Column="1" Margin="0,3,8,3" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Name}" Foreground="#FFCACACA" FontWeight="SemiBold" FontSize="15"/>
+                    <TextBlock TextWrapping="Wrap" MaxHeight="50" TextTrimming="CharacterEllipsis" Text="{Binding HttpRequest.RequestUri}" Foreground="#FFCACACA"/>
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="sideCodeRequestTemplate">
+            <Grid Height="80" ToolTip="{Binding Description}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="60"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Line X1="0" X2="1" Stroke="#FF42484E" Stretch="Fill" Height="1" Grid.ColumnSpan="2" VerticalAlignment="Top"/>
+                <TextBlock Text="CODE" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="UltraBlack" Foreground="#FF2B323C"/>
+                <TextBlock Text="CODE" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="#FF38B4FF"/>
+
+                <StackPanel Grid.Column="1" Margin="0,3,8,3" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Name}" Foreground="#FFCACACA" FontWeight="SemiBold" FontSize="15"/>
+                    <TextBlock TextWrapping="Wrap" MaxHeight="50" TextTrimming="CharacterEllipsis" Text="{Binding Description}" Foreground="#FFCACACA"/>
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+        <local:RequestTemplateSelector x:Key="templateSelector" SingleRequestTemplate="{StaticResource singleRequestTemplate}" CodeRequestTemplate="{StaticResource codeRequestTemplate}"/>
+        <local:RequestTemplateSelector x:Key="sidebarTemplateSelector" SingleRequestTemplate="{StaticResource sideSingleRequestTemplate}" CodeRequestTemplate="{StaticResource sideCodeRequestTemplate}"/>
+    </Window.Resources>
     
     <Grid x:Name="rootGrid" Background="#FF565A60">
         <Grid.RowDefinitions>
@@ -68,31 +117,10 @@
                         </Border>
                     </Border>
 
-                    <ListBox x:Name="items" ItemsSource="{Binding SidebarRequests}" Grid.Row="1" BorderThickness="0" Margin="-1" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDoubleClick="items_MouseDoubleClick">
+                    <ListBox x:Name="items" ItemsSource="{Binding SidebarRequests}" ItemTemplateSelector="{StaticResource sidebarTemplateSelector}" Grid.Row="1" BorderThickness="0" Margin="-1" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDoubleClick="items_MouseDoubleClick">
                         <ListBox.Resources>
                             <Style TargetType="ListBoxItem" BasedOn="{StaticResource SidebarListBoxItemStyle}"/>
                         </ListBox.Resources>
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Height="80" ToolTip="{Binding Description}">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="60"/>
-                                        <ColumnDefinition/>
-                                    </Grid.ColumnDefinitions>
-                                    <Line X1="0" X2="1" Stroke="#FF42484E" Stretch="Fill" Height="1" Grid.ColumnSpan="2" VerticalAlignment="Top"/>
-                                    <TextBlock Text="{Binding HttpRequest.Method}" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="UltraBlack" Foreground="#FF2B323C"/>
-                                    <TextBlock Text="{Binding HttpRequest.Method}" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="#FFFFD538"/>
-
-                                    <StackPanel Grid.Column="1" Margin="0,3,8,3" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding Name}" Foreground="#FFCACACA" FontWeight="SemiBold" FontSize="15"/>
-                                        <TextBlock TextWrapping="Wrap" MaxHeight="50" TextTrimming="CharacterEllipsis" Text="{Binding HttpRequest.RequestUri}" Foreground="#FFCACACA"/>
-                                    </StackPanel>
-                                    
-                                </Grid>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-
-
                     </ListBox>
                 </Grid>
             </Grid>
@@ -105,29 +133,17 @@
                 <Grid.Background>
                     <ImageBrush ImageSource="Assets/facebook-logo.png" Stretch="Uniform"/>
                 </Grid.Background>
-                <TabControl b:TabContent.IsCached="True" ItemsSource="{Binding Requests}" SelectedIndex="{Binding SelectedIndex,Mode=TwoWay}" Background="Transparent" Grid.Row="2" BorderThickness="0,0,0,0" Margin="0,10,0,0" Grid.RowSpan="2" BorderBrush="#7F778293">
+                <TabControl b:TabContent.IsCached="True" b:TabContent.TemplateSelector="{StaticResource templateSelector}" ItemsSource="{Binding Requests}" SelectedIndex="{Binding SelectedIndex,Mode=TwoWay}" Background="Transparent" Grid.Row="2" BorderThickness="0,0,0,0" Margin="0,10,0,0" Grid.RowSpan="2" BorderBrush="#7F778293">
                     <TabControl.ItemContainerStyle>
-                        <Style TargetType="TabItem" BasedOn="{StaticResource BrowserTabStyle}">                           
+                        <Style TargetType="TabItem" BasedOn="{StaticResource BrowserTabStyle}">
                             <Setter Property="Padding" Value="0"/>
                         </Style>
                     </TabControl.ItemContainerStyle>
-                    <b:TabContent.Template>
-                        <DataTemplate DataType="{x:Type m:StoredRequest}">
-                            <Grid>
-                                <u:RequestViewer 
-                                    APIRequest="{Binding HttpRequest}" 
-                                    QueryFields="{Binding ValidUriParameters}" 
-                                    HeaderFields="{Binding ValidHeaderParameters}"
-                                    BodyFields="{Binding ValidBodyParameters}"
-                                    HelpUri="{Binding DocumentationUri}"/>
-                            </Grid>
-                        </DataTemplate>
-                    </b:TabContent.Template>
                     <TabControl.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" Margin="20,8,5,5">
                                 <Ellipse Fill="Green" Width="5" Height="5" VerticalAlignment="Center"/>
-                                <TextBlock Text="http://api.facebook.com" Margin="5,0" TextTrimming="CharacterEllipsis" Foreground="#FF606060" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Name}" Margin="5,0" TextTrimming="CharacterEllipsis" Foreground="#FF606060" VerticalAlignment="Center"/>
                                 <Button Content="❌" Height="20" Style="{DynamicResource TabButtonStyle}" Width="20" VerticalAlignment="Center" Tag="{Binding}" Click="CloseTab_Click"/>
                             </StackPanel>
                         </DataTemplate>

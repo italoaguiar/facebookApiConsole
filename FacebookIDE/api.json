@@ -117,5 +117,12 @@
     ],
     "ValidHeaderParameters": [],
     "ValidBodyParameters": []
+  },
+  {
+    "Name": "Users by Age",
+    "Description": "Get estimates of users grouped by age.",
+    "DocumentationUri": "https://developers.facebook.com/docs/marketing-api/reference/ad-account/reachestimate/",
+    "Type": "CODE",
+    "Code": "using System;\r\nusing System.Net.Http;\r\nusing System.Threading.Tasks;\r\nusing Facebook;\r\n\r\npublic class Script : BaseRequest\r\n{\r\n    string baseUri = \"https://graph.facebook.com/v5.0/\" +\r\n                \"act_<ID>\" +\r\n                \"/reachestimate\" +\r\n                \"?access_token=<TOKEN>\";\r\n\r\n    public override void GetSeries()\r\n    {\r\n        int[] min_ages = new int[] { 13, 24, 35, 45 };\r\n        int[] max_ages = new int[] { 24, 35, 45, 65 };\r\n\r\n        for (int i = 0; i < 4; i++)\r\n        {\r\n            var targeting_spec = new\r\n            {\r\n                geo_locations = new\r\n                {\r\n                    countries = new string[] { \"US\" }\r\n                },\r\n                age_min = min_ages[i],\r\n                age_max = max_ages[i]\r\n            };\r\n\r\n            HttpRequestMessage msg = new HttpRequestMessage();\r\n            msg.Method = HttpMethod.Get;\r\n            msg.RequestUri = new Uri(baseUri + \"&targeting_spec=\" + ToJson(targeting_spec));\r\n\r\n            var serie = RequestSerieValue(msg, \"$.data.users\");\r\n\r\n            AddSerie(serie, \"Usuários entre \" + min_ages[i] + \" e \" + max_ages[i]);\r\n        }\r\n    }\r\n}"
   }
 ]
